@@ -13,12 +13,22 @@ class Product {
 
 class Cart {
   cartItems = [];
+  addProduct(product){
+      console.log(this.totalOutput);
+      this.cartItems.push(product);
+      let sum=0;
+      for(const i of this.cartItems){
+          sum += +i.price;
+      }
+      this.totalOutput.innerHTML = `<h2>Total: \$${sum}</h2>`;
+  }
   render() {
     const cartItem = document.createElement("section");
     cartItem.innerHTML = `
         <h2>Total amounth: \$${0}</h2>
         <button>Order now</button>`;
     cartItem.className = "cart";
+    this.totalOutput = cartItem.querySelector("h2");
     return cartItem;
   }
 }
@@ -28,8 +38,7 @@ class SingleItem {
     this.product = product;
   }
   addToCard() {
-    console.log("The sum of purchases is..");
-    console.log(this.product);
+    App.provideToCard(this.product);
   }
   render() {
     const newItem = document.createElement("li");
@@ -82,14 +91,24 @@ class ProductList {
 class Shop {
   renderShop() {
     const renderedList = document.getElementById("app");
-   
+
     const productList = new ProductList();
     const productListEl = productList.renderItems();
-    const cartAmounth = new Cart();
-    const cartAmounthEl = cartAmounth.render();
+    this.cartAmounth = new Cart();
+    const cartAmounthEl = this.cartAmounth.render();
     renderedList.append(cartAmounthEl);
     renderedList.append(productListEl);
   }
 }
-const render = new Shop();
-render.renderShop();
+
+class App {
+  static init() {
+    const renderSite = new Shop();
+    renderSite.renderShop();
+    this.cart = renderSite.cartAmounth;
+  }
+  static provideToCard(product){
+    this.cart.addProduct(product);
+  }
+}
+App.init();
