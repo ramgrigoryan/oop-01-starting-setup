@@ -11,25 +11,64 @@ class Product {
   }
 }
 
-class Cart {
-  cartItems = [];
-  addProduct(product){
-      console.log(this.totalOutput);
-      this.cartItems.push(product);
-      let sum=0;
-      for(const i of this.cartItems){
-          sum += +i.price;
+class Attribute {
+  constructor(attrName, attrValue) {
+    this.attrName = attrName;
+    this.attrValue = attrValue;
+  }
+}
+
+class Component {
+  constructor(renderHookId) {
+    this.renderHookId = renderHookId;
+  }
+  createRootElement(tag, cssClassName, attributes) {
+    const el = document.createElement(tag);
+    if (cssClassName) {
+      el.className = cssClassName;
+    }
+    if (attributes && attributes.length > 0) {
+      for (const i of attributes) {
+        el.setAttribute(attr.name, attr.value);
       }
-      this.totalOutput.innerHTML = `<h2>Total: \$${sum}</h2>`;
+    }
+    document.getElementById(this.renderHookId).append(el);
+    return el;
+  }
+}
+
+class Cart extends Component {
+  cartItems = [];
+  set addedItems(value) {
+    this.totalOutput.innerHTML = `<h2>Total: \$${this.totalAmount.toFixed(
+      2
+    )}</h2>`;
+    this.cartItems = value;
+  }
+
+  get totalAmount() {
+    const sum = this.cartItems.reduce(
+      (prevValue, curvalue) => prevValue + +curvalue.price,
+      0
+    );
+    return sum;
+  }
+
+  addProduct(product) {
+    this.cartItems.push(product);
+    const updatedItems = [...this.cartItems];
+    // updatedItems.push(product);
+    this.addedItems = updatedItems;
   }
   render() {
-    const cartItem = document.createElement("section");
+    const cartItem = this.createRootElement("section", "cart");
     cartItem.innerHTML = `
-        <h2>Total amounth: \$${0}</h2>
+        <h2>Total: \$${0}</h2>
         <button>Order now</button>`;
-    cartItem.className = "cart";
     this.totalOutput = cartItem.querySelector("h2");
-    return cartItem;
+  }
+  constructor(renderHookId) {
+    super(renderHookId);
   }
 }
 
@@ -94,9 +133,8 @@ class Shop {
 
     const productList = new ProductList();
     const productListEl = productList.renderItems();
-    this.cartAmounth = new Cart();
-    const cartAmounthEl = this.cartAmounth.render();
-    renderedList.append(cartAmounthEl);
+    this.cartAmounth = new Cart("app");
+    this.cartAmounth.render();
     renderedList.append(productListEl);
   }
 }
@@ -107,7 +145,7 @@ class App {
     renderSite.renderShop();
     this.cart = renderSite.cartAmounth;
   }
-  static provideToCard(product){
+  static provideToCard(product) {
     this.cart.addProduct(product);
   }
 }
